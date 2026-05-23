@@ -1,0 +1,46 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write   # required to create a GitHub Release
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set Python 3.12
+        run: uv python install 3.12
+
+      - name: Build wheel + sdist
+        run: uv build
+
+      - name: Verify wheel installs and entry-point works
+        run: |
+          uv venv .verify-venv
+          source .verify-venv/bin/activate
+          pip install dist/*.whl
+          darwinmcp version
+          deactivate
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, 'a') || contains(github.ref_name, 'b') || contains(github.ref_name, 'rc') }}
+          body: |
+            Pre-alpha. See [CHANGELOG.md](./CHANGELOG.md) and [R18_LICENSE_CHECK.md](./R18_LICENSE_CHECK.md).
+
+            **No benchmark numbers are advertised in this release.** All metric placeholders read 未測定.
+          files: |
+            dist/*.whl
+            dist/*.tar.gz

@@ -1,0 +1,77 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: lint + unit + honest-marketing + e2e smoke
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Set Python ${{ matrix.python }}
+        run: uv python install ${{ matrix.python }}
+
+      - name: Sync deps (incl. dev)
+        run: uv sync --extra dev
+
+      - name: Lint (ruff)
+        run: uv run ruff check src tests
+
+      - name: Unit + honest-marketing tests
+        run: uv run pytest -q tests/unit tests/honest_marketing
+
+      - name: E2E smoke
+        run: uv run pytest -q tests/e2e
+
+      - name: INV-5 (entry-point resolves) — already covered by pytest, repeated as explicit gate
+        run: |
+          uv run python -c "from darwinmcp.cli import main; assert callable(main), 'INV-5: darwinmcp.cli:main missing'"
+
+      - name: INV-1 grep guard — fail if NotImplementedError appears outside seed + HF stub
+        run: |
+          set -e
+          # Allow list (literal paths). Anything else: fail.
+          BAD=$(grep -rnE "NotImplementedError" src/darwinmcp \
+            --include="*.py" \
+            --exclude-dir="__pycache__" \
+            | grep -v "src/darwinmcp/seed/fs_tool/server.py" \
+            | grep -v "src/darwinmcp/evolve/llm.py" \
+            || true)
+          if [ -n "$BAD" ]; then
+            echo "INV-1 violation: NotImplementedError outside allowed files:" >&2
+            echo "$BAD" >&2
+            exit 1
+          fi
+          echo "INV-1 OK"
+
+      - name: INV-6 license matrix (Apache/MIT/BSD/Python only)
+        run: |
+          uv pip install pip-licenses
+          uv run pip-licenses \
+            --format=csv \
+            --fail-on="GPL;LGPL;AGPL;NPL;ToU;Proprietary;UNKNOWN" \
+            || (echo "INV-6 violation: dep license outside allowlist" >&2; exit 1)
+
+      - name: INV-2 README honest-marketing — repeat the pytest as a top-level CI gate
+        run: uv run pytest -q tests/honest_marketing/test_readme_no_unmeasured_numbers.py

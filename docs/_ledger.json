@@ -1,0 +1,5 @@
+{
+  "_comment": "Measured-numbers ledger consumed by tests/honest_marketing/test_readme_no_unmeasured_numbers.py (INV-2). v0.1.0a1 ships with an empty ledger because no benchmark runs have been measured yet. Any benchmark figure inserted into README.md without an entry here (and without `未測定`/`TBD`/`example`/`illustrative`/`reference only` in the same context) is a CI failure.",
+  "version": "0.1.0a1",
+  "measurements": {}
+}

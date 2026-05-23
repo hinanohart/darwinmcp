@@ -1,0 +1,5 @@
+R8 失敗博物館 (failure museum).
+
+This directory is intentionally checked in and never `rm -rf`-ed.
+Failed experiments live here under `experiments/_wip/<short-name>/` with a
+`README.md` explaining what was tried and why it didn't ship.

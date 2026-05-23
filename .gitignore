@@ -1,0 +1,28 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.log
+.DS_Store
+.idea/
+.vscode/
+node_modules/
+
+# darwinmcp runtime artifacts (NOT auto-cleaned — R8: experiments/_wip is permanent)
+runs/
+*.svg.tmp
+.darwinmcp-progress.json.bak
+
+# never ignore experiments/_wip — R8 失敗博物館
+!experiments/_wip/

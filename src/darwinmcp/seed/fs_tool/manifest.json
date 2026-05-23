@@ -1,0 +1,11 @@
+{
+  "name": "fs_tool",
+  "version": "0.1.0a1-seed",
+  "kind": "darwinmcp.seed",
+  "purpose": "Phase-0 mutation target. NOT a runnable MCP server in v0.1.",
+  "tools": [
+    {"name": "fs_read", "status": "placeholder", "note": "evolved away by the loop"}
+  ],
+  "placeholder": true,
+  "see_also": ["../../../R18_LICENSE_CHECK.md", "../../../README.md#honest-marketing"]
+}
