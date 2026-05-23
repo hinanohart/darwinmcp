@@ -1,7 +1,7 @@
 [project]
 name = "darwinmcp"
-version = "0.1.0a1"
-description = "Evolve MCP server.py code via SWE-bench-style sandbox fitness with lineage × tool-trace interpretability (pre-alpha)."
+version = "0.1.0a2"
+description = "Evolve MCP server.py code via subprocess sandbox fitness with lineage × tool-trace interpretability (pre-alpha; SWE-bench Verified adapter is v0.2 backlog)."
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [

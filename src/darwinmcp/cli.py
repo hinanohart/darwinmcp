@@ -22,6 +22,7 @@ from .bootstrap.progress import ProgressV2, read_progress, write_progress
 from .eval.fitness_tasks import HelloWorldTask
 from .eval.sandbox_subprocess import SubprocessSandbox
 from .evolve.llm import get_backend
+from .evolve.mutator import mutate
 from .lineage.graph import LineageGraph
 from .trace.tool_call_logger import ToolCallLogger
 
@@ -59,8 +60,10 @@ def _cmd_evolve(args: argparse.Namespace) -> int:
     parent_id = lineage.add_root(seed_code)
 
     for gen in range(args.generations):
-        diff_seed = backend.propose_diff(seed_code, hint="add a comment")
-        variant_code = seed_code + "\n# variant gen=" + str(gen + 1) + ": " + diff_seed + "\n"
+        # Route every mutation through evolve.mutator.mutate — this is the
+        # public surface that Phase-1 will swap to shinka-evolve-driven diffs.
+        # Keeping cli.py thin around this call lets the loop stay stable.
+        variant_code = mutate(seed_code, backend, generation=gen + 1, hint="add a comment")
         score = sandbox.run(task, variant_code, logger)
         child_id = lineage.add_child(parent_id, variant_code, fitness=score)
         prog.generation = gen + 1

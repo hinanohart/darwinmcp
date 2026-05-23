@@ -5,6 +5,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+## [0.1.0a2] — 2026-05-24 (Phase 0 hardening; 3-monitor agent findings)
+
+### Changed
+- `cli.py` evolve loop now routes mutations through `evolve.mutator.mutate` (previously inlined). API surface and loop are now identical, removing a dead-code drift the critic monitor flagged.
+- `evolve.llm.HFInferenceLLM.__init__` unified to a single `NotImplementedError` regardless of `HF_TOKEN` (previously branched between `RuntimeError` and `NotImplementedError`). This prevents the saelet-style UX trap where "set the env var" looks like it will enable a feature that v0.1 does not ship.
+- `pyproject.toml` `description` reworded from "SWE-bench-style sandbox fitness" → "subprocess sandbox fitness (SWE-bench Verified adapter is v0.2 backlog)" to prevent PyPI-page misread.
+- `bootstrap/progress.py` `core_deps_locked` retains `shinka-evolve` and adds `openhands-tools` as **sentinel keys** with `"v0.2-deferred-resolver"` / `"v0.2-deferred-license"` markers, so the pivot decision is not lost in cross-session progress files.
+
+### Added
+- `examples/01_hello_evolve.py` — 5-line demo runnable in <30s after `pip install darwinmcp` (architect-monitor recommendation).
+- `tests/e2e/test_quickstart.py` — 30s budget gate around the demo (machine-enforced version of INV-10).
+- `.darwinmcp-progress.json` committed at repo root with `current_step="P0-complete"` and the v0.1.0a1 verify results, so a next-session compact restore can pick up state from `git checkout` alone.
+
+### Documented
+- `R18_LICENSE_CHECK.md` § 1 now lists ISC (shellingham), PSF-2.0 (typing_extensions), and MPL-2.0 file-level-copyleft (certifi/tqdm) as permitted transitive deps with rationale.
+- `lineage/circuitmap.py` docstring corrected — the previous wording said "the function raises on call" but the implementation returns an empty `CircuitMapAlpha`. The new wording matches the implementation.
+- `bootstrap/honest_marketing.py` INV-2 grep is intentionally narrowed to **claim-shaped** numbers (`N.N%` etc.) rather than every decimal, to avoid false positives on version strings (`3.11`) and license identifiers ("Apache 2.0"). This is a deliberate spec narrowing of `project_evomcp_unified_synthesis_2026-05-24` § 7 INV-2 and is recorded here per the architect-monitor flag.
+
 ## [0.1.0a1] — 2026-05-24 (pre-alpha bootstrap)
 
 ### Added

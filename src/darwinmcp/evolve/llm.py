@@ -63,17 +63,16 @@ class HFInferenceLLM(LLMBackend):
     name = "hf"
 
     def __init__(self, model: str = "Qwen/Qwen2.5-Coder-32B-Instruct") -> None:
-        if not os.environ.get("HF_TOKEN"):
-            raise RuntimeError(
-                "HFInferenceLLM is not implemented in v0.1 (stub). "
-                "Set HF_TOKEN and use the dummy backend for v0.1, or wait for v0.2."
-            )
-        # Even if HF_TOKEN is set we still refuse in v0.1 — single source of truth.
+        # Unified failure path: regardless of HF_TOKEN, v0.1 does NOT implement
+        # HF inference. A single NotImplementedError prevents the saelet-style
+        # UX trap where "set the env var and it works" leads to silent fallback.
         # INV-1: this is the ONE allowed non-seed NotImplementedError; the
         # `tests/honest_marketing/test_inv1_no_extra_placeholders.py` exempts
         # this file explicitly, and the CI grep guard mirrors that allowlist.
+        del model  # held for v0.2 API compatibility
+        _ = os.environ.get("HF_TOKEN")  # documented input, not used in v0.1
         raise NotImplementedError(
-            "HFInferenceLLM is deferred to v0.2. Use --backend dummy for v0.1."
+            "HFInferenceLLM is deferred to v0.2. v0.1 ships --backend dummy only."
         )
 
     def propose_diff(self, seed_code: str, hint: str) -> str:  # pragma: no cover

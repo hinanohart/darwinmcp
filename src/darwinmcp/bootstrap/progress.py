@@ -32,10 +32,15 @@ class ProgressV2:
     circuit_breaker: CircuitBreaker = field(default_factory=CircuitBreaker)
     repo: str = "hinanohart/darwinmcp"
     license: str = "Apache-2.0"
+    # Sentinel values document v0.1 dep state for the cross-session progress
+    # file. `shinka-evolve` / `openhands-tools` are kept as keys (with explicit
+    # "v0.2-deferred-*" markers) so a future critic agent can grep this dict
+    # without losing the pivot decision audit trail (see R18_LICENSE_CHECK.md).
     core_deps_locked: dict[str, str] = field(
         default_factory=lambda: {
             "mcp": "TBD-P0",
-            "shinka-evolve": "TBD-P0",
+            "shinka-evolve": "v0.2-deferred-resolver",  # PyPI 0.0.6 vs mcp httpx conflict
+            "openhands-tools": "v0.2-deferred-license",  # LICENSE not stated on PyPI
             "huggingface-hub": "TBD-P0",
         }
     )

@@ -1,8 +1,10 @@
 # R18 License & Prior-Art Audit — darwinmcp v0.1
 
-> Performed: 2026-05-24 (Phase 0, pre `gh repo create`).
+> Performed: 2026-05-24 (Phase 0, pre `gh repo create`). v0.1.0a2 update: 3-monitor audit補記.
 > Auditor: hinanohart (automated, 3 WebFetch + 5 WebSearch).
-> Policy: dependencies licensed Apache-2.0 / MIT / BSD-3 / Python-2.0 only. Anything else → exclude or reference-only.
+> Policy: dependencies licensed Apache-2.0 / MIT / BSD-3 / Python-2.0 only.
+> **Permissive transitive deps allowed in resolved env (CI fail-on excludes them by name)**: ISC (shellingham), PSF-2.0 (typing_extensions), MPL-2.0 file-level copyleft (tqdm sub-mod, certifi cert bundle) — all OSI-approved, no copy-left propagation through use, and none bundled into the darwinmcp wheel (see § 3).
+> Anything else → exclude or reference-only.
 
 ---
 

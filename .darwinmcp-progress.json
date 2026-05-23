@@ -1,0 +1,65 @@
+{
+  "project": "darwinmcp",
+  "current_step": "P0-complete",
+  "completed_steps": ["P0"],
+  "step_started_at": "2026-05-24T17:30:00+00:00",
+  "step_attempts": 1,
+  "blockers": [],
+  "circuit_breaker": {
+    "max_attempts_per_step": 5,
+    "max_total_hours": 240
+  },
+  "repo": "hinanohart/darwinmcp",
+  "license": "Apache-2.0",
+  "core_deps_locked": {
+    "mcp": ">=1.25,<2",
+    "shinka-evolve": "v0.2-deferred-resolver",
+    "openhands-tools": "v0.2-deferred-license",
+    "huggingface-hub": ">=0.24"
+  },
+  "hf_default_model": "Qwen/Qwen2.5-Coder-32B-Instruct",
+  "generation": 1,
+  "fitness_tasks_count": 1,
+  "structural_placeholders": [
+    "src/darwinmcp/seed/fs_tool/server.py"
+  ],
+  "forbidden_until_measured": [
+    "swe_bench_resolve_rate",
+    "tool_call_success_rate",
+    "circuitmap_attribution_score"
+  ],
+  "last_smoke_test_passed": true,
+  "fallback_log": [
+    "openhands-tools: license-not-stated → SubprocessSandbox in-tree replacement",
+    "shinka-evolve: PyPI cap 0.0.6 vs mcp httpx → excluded from v0.1, [shinka-git] extra planned for v0.2",
+    "HF_TOKEN absent → DummyLLM default; HFInferenceLLM v0.2-deferred"
+  ],
+  "human_intervention_required": false,
+  "human_intervention_reason": null,
+  "three_agent_verify_results": {
+    "B1_architect": {
+      "verdict": "PHASE-0-OK",
+      "deviations_minor": 5,
+      "note": "examples/01_hello_evolve.py + INV-2 regex narrowing doc + MPL R18 note + progress sentinel + HFInferenceLLM dual-raise"
+    },
+    "B2_critic": {
+      "verdict": "SHIP-OK-AS-PRE-ALPHA",
+      "deviations_minor": 5,
+      "note": "mutator() dead code + circuitmap docstring + pyproject SWE-bench-style + examples + repo-root progress file"
+    },
+    "M_verifier": {
+      "verdict": "3-AGENT-VERIFY-OK",
+      "criteria_passed": "11/11",
+      "note": "all 11 acceptance criteria VERIFIED via independent command execution"
+    },
+    "all_three_agreed": true,
+    "audited_at": "2026-05-24T17:55:00+00:00",
+    "audit_release_tag": "v0.1.0a1",
+    "hardening_release_tag": "v0.1.0a2"
+  },
+  "checkpoints": [
+    {"step": "P0", "tag": "v0.1.0a1", "at": "2026-05-24T17:55:00+00:00", "outcome": "shipped"},
+    {"step": "P0-hardening", "tag": "v0.1.0a2", "at": "2026-05-24T18:05:00+00:00", "outcome": "post-monitor minor fixes"}
+  ],
+  "$schema_version": "2"
+}

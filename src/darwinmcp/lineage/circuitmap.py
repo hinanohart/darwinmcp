@@ -2,8 +2,10 @@
 
 Phase 2 fills in the actual attribution computation. v0.1 ships the data
 class and a stub `compute` so callers can build against the v0.1 API
-without v0.2 churn — but no numbers are produced and the function raises
-on call, so README cannot accidentally cite a value.
+without v0.2 churn. `compute` returns a structurally-valid but empty
+table (`cells == {}`); no attribution numbers are produced. Downstream
+renderers should treat `cells == {}` as "(α v0.2 stub — no attribution
+yet)" rather than as a meaningful zero.
 
 NOTE: per the synthesis decision (`project_evomcp_unified_synthesis_…`),
 v0.1 has ONLY 2 axes; the 3rd axis (cross-layer transcoder attribution)
