@@ -21,11 +21,12 @@ class HelloWorldTask(FitnessTask):
     name = "hello_world"
 
     def probe(self, variant_code: str) -> str:
-        # We embed the variant as a triple-quoted string so the sandbox is one
-        # short self-contained Python program. The sandbox runs this string.
-        escaped = variant_code.replace('"""', '\\"\\"\\"')
+        # Use `repr()` round-trip so the variant — including trailing backslashes,
+        # mixed quote styles, and embedded triple-quotes — survives intact. Manual
+        # escape arithmetic (the old approach) silently mis-scored variants
+        # ending in `\\` as FAIL, blaming the variant for a probe-wrapper bug.
         return (
-            "code = '''" + escaped.replace("'", "\\'") + "'''\n"
+            "code = " + repr(variant_code) + "\n"
             "try:\n"
             "    compile(code, '<variant>', 'exec')\n"
             "    print('PASS')\n"

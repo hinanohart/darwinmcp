@@ -25,12 +25,28 @@ class SubprocessSandbox(Sandbox):
 
     name = "subprocess"
 
-    def __init__(self, timeout_s: float = 5.0) -> None:
+    def __init__(self, timeout_s: float = 5.0, memory_mb: int = 256) -> None:
         self.timeout_s = timeout_s
+        self.memory_mb = memory_mb
+
+    def _preexec(self) -> None:  # pragma: no cover — Linux-only, runs in child
+        # Best-effort address-space cap on Linux. Not a security boundary
+        # (see module docstring), but a fork bomb / runaway allocator from
+        # a malformed variant now hits ~256 MiB instead of host memory.
+        if not sys.platform.startswith("linux"):
+            return
+        try:
+            import resource  # noqa: PLC0415 — Linux-only
+
+            cap = self.memory_mb << 20
+            resource.setrlimit(resource.RLIMIT_AS, (cap, cap))
+        except (ImportError, ValueError, OSError):
+            pass
 
     def run(self, task: FitnessTask, variant_code: str, logger) -> float:
         probe = task.probe(variant_code)
         started = time.monotonic()
+        preexec = self._preexec if sys.platform.startswith("linux") else None
         try:
             proc = subprocess.run(
                 [sys.executable, "-I", "-c", probe],
@@ -38,6 +54,7 @@ class SubprocessSandbox(Sandbox):
                 text=True,
                 timeout=self.timeout_s,
                 check=False,
+                preexec_fn=preexec,
             )
         except subprocess.TimeoutExpired:
             logger.log_call(

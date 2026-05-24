@@ -5,6 +5,42 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+## [0.1.0a3] — 2026-05-24 (meta-audit hotfix; 4-agent re-review)
+
+A second 3-agent + 1-critic meta-audit was run after v0.1.0a2. The 3 prior monitors (B1/B2/M) had returned unanimous SHIP-OK but shared a structural blind spot — they only verified *internal* coherence (code ⇄ memory spec) and never validated the repo ⇄ external-world boundary (PyPI / git URL). The meta-audit found 2 FATAL, 10 HIGH, 11 MED, all bundled here.
+
+### Fixed (FATAL)
+- README install command was `pip install darwinmcp==0.1.0a1` while `__version__ == 0.1.0a2`. Rewritten to `pip install "git+https://github.com/hinanohart/darwinmcp@v0.1.0a3"` and PyPI publish honestly deferred to v0.1.0 GA.
+- `pip install darwinmcp` (PyPI) was instructed despite the package not existing on PyPI (`https://pypi.org/pypi/darwinmcp/json` → 404). The git+https form above resolves this.
+
+### Fixed (HIGH)
+- `cli.py::_cmd_verify` read the ledger as `{"_comment":…, "version":…, "measurements":…}` raw, while the honest-marketing test correctly unwrapped `["measurements"]`. The CLI now matches CI — `darwinmcp verify` will accept a populated ledger.
+- `eval/fitness_tasks.py::HelloWorldTask.probe` used manual `\\"\\"\\"` / `\\'` escaping that silently mis-scored variants ending in a backslash. Rewritten to `repr(variant_code)` round-trip — no escape arithmetic.
+- README "only structural placeholder" wording reworded to "only *run-path* placeholder", with `evolve/llm.py::HFInferenceLLM` explicitly named as the second allowed (construction-time) NotImplementedError site. Matches the CI grep allowlist and INV-1 test.
+- `bootstrap/honest_marketing.py` INV-2 regex hardened: now matches both number-then-unit AND unit-then-number forms, plus a new `_CLAIM_RE_UNIT_NUM` for "Score: 76.8" / "accuracy 76.8" patterns. 12 fuzz cases added in `tests/honest_marketing/test_inv2_regex_fuzz.py`.
+- `mcp_compat.assert_compatible` was dead code (no caller in src/ or tests/). Now wired into `cli.py::main` for the `evolve` subcommand only (so `version` / `init` / `verify` remain usable when `mcp` is absent).
+- `evolve/llm.py::HFInferenceLLM.__init__` dropped the dead `_ = os.environ.get("HF_TOKEN")` read.
+- `release.yml` now machine-enforces **INV-7** (tag ↔ `current_step` sync — the saelet failure mode) and **INV-11** (3-agent verify gate, GA-only — guarded by `!contains(ref_name, 'a/b/rc')`).
+- `ci.yml` adds **INV-12** (README install command ↔ `__version__` consistency check) — would have caught the FATAL above before tag time.
+- README adds an honest "Dependency disclosure" paragraph: v0.1 imports only `networkx` + `importlib.metadata`; `mcp`/`huggingface-hub`/`pydantic`/`rich` are forward-compat pins (and capped `<2` where not already capped).
+
+### Fixed (MED)
+- `bootstrap/progress.py` now validates `$schema_version` on read (loud failure on v0.1↔v0.2 mismatch instead of silent `TypeError`).
+- `bootstrap/progress.py::write_progress` is now atomic (`tempfile`-style `replace`) per the original spec.
+- `lineage/circuitmap.py::CircuitMapAlpha` gains `measured: bool = False` so Phase-2 non-empty `cells` cannot land without flipping the flag (spec INV-6).
+- `eval/sandbox_subprocess.py` adds `RLIMIT_AS` (256 MiB) via `preexec_fn` on Linux, graceful no-op elsewhere.
+- README "always passes in pre-alpha" softened to "currently passes while the ledger is empty" (per `feedback_no-permanent-claim-2026-05-14`).
+- `pyproject.toml` keyword `"swe-bench"` → `"swe-bench-roadmap"` so a PyPI searcher landing from a SWE-bench query is not misled.
+- `pyproject.toml` upper bounds added: `huggingface-hub<2`, `pydantic<3` (mcp already `<2`).
+- `release.yml` smoke step extended: `darwinmcp init && darwinmcp evolve --generations 1 --backend dummy` (not just `darwinmcp version`) — verifies the install actually runs.
+- `ci.yml` matrix gains Python 3.13.
+- New: `tests/integration/test_fitness_monotonic.py` (skip-marked stub, locks INV-3 slot for Phase 1).
+- New: `tests/unit/test_lineage_merkle.py` (xfail-marked, locks INV-4 parent-hash requirement).
+- New: `tests/honest_marketing/test_forbidden_until_measured.py` (forbidden_until_measured guard — honest marketing) — fails if `swe_bench_resolve_rate` / `tool_call_success_rate` / `circuitmap_attribution_score` appear in README/CHANGELOG outside an allow-context token.
+
+### Documented
+- All B1/B2/M v0.1.0a2 verdicts confirmed unchanged; the meta-audit findings are additive, not corrective. 3-monitor template is now augmented with a 4th axis: **W (world-checker)** — verifies repo ⇄ external world (PyPI, git URL, README install command resolvability). To be applied at every future ship gate.
+
 ## [0.1.0a2] — 2026-05-24 (Phase 0 hardening; 3-monitor agent findings)
 
 ### Changed
@@ -44,7 +80,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 - Sandbox is **subprocess-based, NOT docker-based** in v0.1 — escalation deferred to v0.2 (`openhands-tools` license + Python 3.12+ requirement triage).
 - LLM backend is **DummyLLM (deterministic) by default** — `HFInferenceLLM` exists as stub only, full HF API integration is a v0.2 milestone.
 - CircuitMap = **α 2-axis only** (lineage × tool-trace). The 3rd axis (cross-layer transcoder attribution) is a v0.2 milestone.
-- This is pre-alpha. `pip install darwinmcp==0.1.0a1` runs the smoke test but does not produce publishable evolution metrics.
+- This is pre-alpha. `pip install "git+https://github.com/hinanohart/darwinmcp@v0.1.0a3"` runs the smoke test but does not produce publishable evolution metrics.
 
 ### Differentiation vs prior art (R18 — see `R18_LICENSE_CHECK.md` § 2)
 - **`evolver` (EvoMap, GPL-3)** — prompt-only, no code mutation, no SWE-bench, no tool trace.

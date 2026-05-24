@@ -34,27 +34,31 @@ This is **not** a benchmark harness, a model trainer, or an agent runtime. It is
 
 ## Install
 
+`darwinmcp` v0.1.0a* is **not yet on PyPI** — install directly from the GitHub tag:
+
 ```bash
-pip install darwinmcp==0.1.0a1
+pip install "git+https://github.com/hinanohart/darwinmcp@v0.1.0a3"
 # or
-uv pip install darwinmcp==0.1.0a1
+uv pip install "git+https://github.com/hinanohart/darwinmcp@v0.1.0a3"
 ```
 
-Requires Python 3.11+.
+PyPI publish is planned for v0.1.0 GA. Requires Python 3.11+.
+
+**Dependency disclosure (honest marketing)**: v0.1 source imports only `networkx` and `importlib.metadata`. The other declared deps (`mcp`, `huggingface-hub`, `pydantic`, `rich`) are pinned for Phase-1 forward-compatibility and will be split into a `[phase1]` extra at v0.1.0 GA. See `pyproject.toml` comments.
 
 ## Quickstart
 
 ```bash
 darwinmcp init my-run           # writes .darwinmcp-progress.json in $PWD
 darwinmcp evolve --generations 1 --backend dummy   # 1 generation, deterministic
-darwinmcp verify                # asserts ledger ⊇ README numbers (always passes in pre-alpha — no numbers asserted)
+darwinmcp verify                # asserts ledger ⊇ README numbers (currently passes while the ledger is empty — no benchmark numbers asserted in v0.1)
 ```
 
 The `dummy` backend produces deterministic diffs without any network call. The `hf` backend (HuggingFace Inference API, default model `Qwen/Qwen2.5-Coder-32B-Instruct`) is implemented as a stub in v0.1 and fully wired in v0.2.
 
 ## Current status
 
-- **v0.1.0a1 (this release)** — Phase 0 bootstrap. Skeleton, ABCs, dummy LLM, subprocess sandbox, 1 sample task (`HelloWorldTask`), lineage stub, CI honesty enforcement. **All metric placeholders read 未測定.**
+- **v0.1.0a3 (this release)** — Phase 0 bootstrap + 3-monitor hardening + meta-audit hotfix (README install URL → git+https, phantom-dep disclosure, INV-7/INV-11 release gates, INV-12 regex hardening, mcp_compat wired into CLI). Skeleton, ABCs, dummy LLM, subprocess sandbox (RLIMIT_AS on Linux), 1 sample task (`HelloWorldTask`), lineage stub. **All metric placeholders read 未測定.**
 - **v0.1.0** — Phase 1+2 + 3-agent ship verify gate. ETA: 6 weeks from 2026-05-24 per `project_evomcp_unified_synthesis_2026-05-24.md`.
 - **v0.2** — HF backend live, docker sandbox option, SWE-bench Verified fitness adapter, CircuitMap α 3rd axis.
 
@@ -64,8 +68,8 @@ This project follows `feedback_ship-and-yank-lesson-2026-05-23`:
 
 - **No claimed benchmark numbers** appear in this README. Any number that does appear must be either (a) in the measured ledger `docs/_ledger.json` or (b) followed by `未測定` / `TBD` / `example` / `illustrative` in the same paragraph. CI enforces this via `tests/honest_marketing/test_readme_no_unmeasured_numbers.py`.
 - **No CI grep whitelist.** Numbers are not exempted by name.
-- **The only structural placeholder** in the v0.1 package is `src/darwinmcp/seed/fs_tool/server.py`, which is the *target of mutation* and is explicitly marked. Everywhere else, `NotImplementedError` is forbidden (CI INV-1).
-- **`pip install` runs the smoke test.** If the entry-point `darwinmcp` is missing or broken, CI fails (INV-5).
+- **The only *run-path* placeholder** in the v0.1 package is `src/darwinmcp/seed/fs_tool/server.py`, which is the *target of mutation* and is explicitly marked. `evolve/llm.py::HFInferenceLLM.__init__` is the only other allowed `NotImplementedError` site — it raises *at construction time* (CLI-time guard) and exists only so the CLI surface for v0.2's `--backend hf` is stable now. Everywhere else, `NotImplementedError` is forbidden (CI INV-1, with these two file-level allowlist entries explicitly mirrored between the test and the grep gate).
+- **`pip install` runs the smoke test.** If the entry-point `darwinmcp` is missing or broken, CI fails (INV-5). The README install command itself is machine-checked against `__version__` so it cannot lag behind a release (INV-12).
 - **Vendor checkmarks** (e.g. "✓ uses X") link to that vendor's actual public statement, not to an aspirational claim.
 
 ## License

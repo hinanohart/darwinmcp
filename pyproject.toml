@@ -1,6 +1,6 @@
 [project]
 name = "darwinmcp"
-version = "0.1.0a2"
+version = "0.1.0a3"
 description = "Evolve MCP server.py code via subprocess sandbox fitness with lineage × tool-trace interpretability (pre-alpha; SWE-bench Verified adapter is v0.2 backlog)."
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -10,7 +10,7 @@ authors = [
 maintainers = [
     { name = "hinanohart", email = "runzaisongpu95@gmail.com" }
 ]
-keywords = ["mcp", "evolution", "evolvable-server", "shinka-evolve", "interpretability", "swe-bench"]
+keywords = ["mcp", "evolution", "evolvable-server", "shinka-evolve", "interpretability", "swe-bench-roadmap"]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Developers",
@@ -24,9 +24,13 @@ classifiers = [
 ]
 requires-python = ">=3.11"
 dependencies = [
+    # v0.1 only imports `networkx` and `importlib.metadata` (for `mcp_compat`).
+    # The other four are pinned for Phase-1 forward-compatibility — see README §
+    # "Install" for the honest disclosure. They will be split into `[phase1]` extra
+    # at v0.1.0 GA when the import edge is fully wired.
     "mcp>=1.25,<2",
-    "huggingface-hub>=0.24",
-    "pydantic>=2.5",
+    "huggingface-hub>=0.24,<2",
+    "pydantic>=2.5,<3",
     "networkx>=3.2",
     "rich>=13",
 ]

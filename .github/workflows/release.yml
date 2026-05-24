@@ -21,15 +21,47 @@ jobs:
       - name: Set Python 3.12
         run: uv python install 3.12
 
+      - name: INV-7 tag ↔ current_step sync
+        run: |
+          actual=$(jq -r '.current_step' .darwinmcp-progress.json)
+          tag="${{ github.ref_name }}"
+          if [[ "$tag" =~ ^v0\.1\.0a ]]; then
+            expected="P0-complete"
+          elif [[ "$tag" =~ ^v0\.1\.0(b|rc) ]]; then
+            expected="P2-complete"
+          else
+            expected="P3-complete"
+          fi
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::INV-7 violation: tag=$tag expects current_step=$expected but got $actual" >&2
+            exit 1
+          fi
+          echo "INV-7 OK ($tag ↔ $actual)"
+
+      - name: INV-11 3-agent verify gate (GA only)
+        if: ${{ !contains(github.ref_name, 'a') && !contains(github.ref_name, 'b') && !contains(github.ref_name, 'rc') }}
+        run: |
+          if ! jq -e '.three_agent_verify_results.all_three_agreed == true' .darwinmcp-progress.json > /dev/null; then
+            echo "::error::INV-11 violation: 3-agent verify did not unanimously SHIP-OK in .darwinmcp-progress.json" >&2
+            exit 1
+          fi
+          echo "INV-11 OK (all_three_agreed == true)"
+
       - name: Build wheel + sdist
         run: uv build
 
-      - name: Verify wheel installs and entry-point works
+      - name: Verify wheel installs and CLI actually runs (not just version)
         run: |
           uv venv .verify-venv
           source .verify-venv/bin/activate
           pip install dist/*.whl
           darwinmcp version
+          # INV-5 corollary: the full evolve happy-path must work post-install
+          tmpdir=$(mktemp -d)
+          cd "$tmpdir"
+          darwinmcp init
+          darwinmcp evolve --generations 1 --backend dummy
+          test -f runs/trace.json || (echo "post-install evolve did not produce runs/trace.json" >&2; exit 1)
           deactivate
 
       - name: Create GitHub Release

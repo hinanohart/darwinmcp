@@ -82,10 +82,18 @@ def _cmd_evolve(args: argparse.Namespace) -> int:
 
 
 def _cmd_verify(args: argparse.Namespace) -> int:
+    del args  # verify takes no flags; the subparser exists for symmetry
     repo_root = Path.cwd()
     readme = (repo_root / "README.md").read_text() if (repo_root / "README.md").exists() else ""
     ledger_path = repo_root / "docs" / "_ledger.json"
-    ledger = json.loads(ledger_path.read_text()) if ledger_path.exists() else {}
+    # Ledger file shape: {_comment, version, measurements: {<token>: <value>}}.
+    # The honest-marketing test unwraps `["measurements"]`; we do the same here
+    # so `darwinmcp verify` and CI cannot disagree on which numbers are blessed.
+    if ledger_path.exists():
+        ledger_raw = json.loads(ledger_path.read_text())
+        ledger = ledger_raw.get("measurements", ledger_raw) if isinstance(ledger_raw, dict) else {}
+    else:
+        ledger = {}
     from .bootstrap.honest_marketing import (
         check_readme_numbers,  # local import to avoid cli warmup cost
     )
@@ -132,6 +140,14 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.cmd == "evolve":
+        # Wire mcp_compat into the run-path: evolve actually exercises MCP shape;
+        # version / init / verify do not, so they remain usable when `mcp` is
+        # absent. This converts mcp_compat.assert_compatible from dead defence
+        # into an active CLI-time guard.
+        from .mcp_compat import assert_compatible
+
+        assert_compatible()
     return args.fn(args)
 
 

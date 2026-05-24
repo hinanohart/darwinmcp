@@ -1,7 +1,7 @@
 {
   "project": "darwinmcp",
   "current_step": "P0-complete",
-  "completed_steps": ["P0"],
+  "completed_steps": ["P0", "P0-hardening", "P0-meta-audit-hardening"],
   "step_started_at": "2026-05-24T17:30:00+00:00",
   "step_attempts": 1,
   "blockers": [],
@@ -15,13 +15,15 @@
     "mcp": ">=1.25,<2",
     "shinka-evolve": "v0.2-deferred-resolver",
     "openhands-tools": "v0.2-deferred-license",
-    "huggingface-hub": ">=0.24"
+    "huggingface-hub": ">=0.24,<2",
+    "pydantic": ">=2.5,<3"
   },
   "hf_default_model": "Qwen/Qwen2.5-Coder-32B-Instruct",
   "generation": 1,
   "fitness_tasks_count": 1,
   "structural_placeholders": [
-    "src/darwinmcp/seed/fs_tool/server.py"
+    "src/darwinmcp/seed/fs_tool/server.py",
+    "src/darwinmcp/evolve/llm.py::HFInferenceLLM"
   ],
   "forbidden_until_measured": [
     "swe_bench_resolve_rate",
@@ -32,7 +34,9 @@
   "fallback_log": [
     "openhands-tools: license-not-stated → SubprocessSandbox in-tree replacement",
     "shinka-evolve: PyPI cap 0.0.6 vs mcp httpx → excluded from v0.1, [shinka-git] extra planned for v0.2",
-    "HF_TOKEN absent → DummyLLM default; HFInferenceLLM v0.2-deferred"
+    "HF_TOKEN absent → DummyLLM default; HFInferenceLLM v0.2-deferred",
+    "PyPI publish (darwinmcp package name) deferred to v0.1.0 GA — meta-audit FATAL hotfix in v0.1.0a3 switched install URL to git+https form",
+    "3-monitor template (B1/B2/M) augmented with 4th W (world-checker) axis after v0.1.0a3 meta-audit caught repo⇄external-world blind spot (README install URL drift + PyPI 404)"
   ],
   "human_intervention_required": false,
   "human_intervention_reason": null,
@@ -57,9 +61,85 @@
     "audit_release_tag": "v0.1.0a1",
     "hardening_release_tag": "v0.1.0a2"
   },
+  "four_agent_meta_audit_results": {
+    "audited_at": "2026-05-24T12:34:00+00:00",
+    "audit_release_tag": "v0.1.0a2",
+    "hotfix_release_tag": "v0.1.0a3",
+    "trigger_user_message": "完全に全て自動で完全に欠陥や漏れがないか徹底的にチェック前提すら疑って致命的なことはないか…完全完成までこのセッションで…私は何も介入しません",
+    "monitor_blind_spot_recorded": "repo ⇄ external world boundary (PyPI / git URL / README install resolvability) was never verified by B1/B2/M — a 4th axis W (world-checker) has been added for all future ship gates",
+    "agent_a_architect_consistency": {
+      "verdict": "NEEDS-FIXES",
+      "findings_total": 15,
+      "fatal": 0,
+      "high": 6,
+      "med": 7,
+      "low": 2,
+      "key_findings": [
+        "H-1: cli._cmd_verify ledger shape mismatch with honest_marketing test",
+        "H-2: probe escape bug in fitness_tasks.py HelloWorldTask",
+        "H-3: README 'only structural placeholder' vs evolve/llm.py HFInferenceLLM second site",
+        "H-4: INV-2 regex narrow vs Agent-C bypass patterns",
+        "H-5: mcp_compat.assert_compatible dead code (no caller)",
+        "H-6: HFInferenceLLM dead os.environ.get HF_TOKEN read",
+        "M-4: CircuitMapAlpha lacks measured flag for INV-6",
+        "M-5: forbidden_until_measured list never grepped"
+      ]
+    },
+    "agent_b_code_reviewer": {
+      "verdict": "NEEDS-REFINEMENT",
+      "findings_total": 9,
+      "fatal": 0,
+      "high": 2,
+      "med": 5,
+      "low": 2,
+      "key_findings": [
+        "H-7: progress.py schema_version not validated on read",
+        "H-8: progress.py write not atomic",
+        "M-6: sandbox_subprocess.py missing RLIMIT_AS",
+        "M-7: README 'always passes' permanent-claim violation",
+        "M-8: pyproject keyword 'swe-bench' misleading"
+      ]
+    },
+    "agent_c_critic_external_world": {
+      "verdict": "NEEDS-HOTFIX-v0.1.0a3",
+      "findings_total": 17,
+      "fatal": 2,
+      "high": 2,
+      "med": 8,
+      "low": 5,
+      "key_findings": [
+        "F-1 (FATAL): README install command pinned v0.1.0a1 while __version__==v0.1.0a2",
+        "F-2 (FATAL): pip install darwinmcp instructed but PyPI returns 404 (package not published)",
+        "H-9: release.yml lacks INV-7 (tag↔current_step) gate — same failure mode as saelet",
+        "H-10: release.yml lacks INV-11 (3-agent verify) GA gate",
+        "M-9: ci.yml lacks INV-12 (README install URL ↔ __version__) — would have caught F-1 pre-tag",
+        "M-10: release.yml smoke is `darwinmcp version` only — does not exercise evolve loop",
+        "M-11: ci.yml matrix missing Python 3.13"
+      ]
+    },
+    "synthesis_critic_verifier": {
+      "verdict": "ALL-FIXES-LAND-AS-v0.1.0a3",
+      "all_fatal_fixed": true,
+      "all_high_fixed": true,
+      "all_med_fixed": true,
+      "low_deferred_to_v0_1_0": 2,
+      "new_invariant_added": "INV-12 (External install resolves) — README install command must reference current __version__; enforced in ci.yml",
+      "new_test_files_added": [
+        "tests/honest_marketing/test_inv2_regex_fuzz.py (8 bad + 8 ok)",
+        "tests/honest_marketing/test_forbidden_until_measured.py",
+        "tests/integration/test_fitness_monotonic.py (INV-3 skip stub)",
+        "tests/unit/test_lineage_merkle.py (INV-4 xfail stub)"
+      ],
+      "test_count_growth": "38 → 56 (+18)",
+      "ruff_status": "All checks passed!",
+      "local_inv12_check": "VERSION 0.1.0a3 ↔ README ['0.1.0a3','0.1.0a3'] no mismatches",
+      "post_install_smoke": "git+https install in clean /tmp dir → darwinmcp init → evolve gen=1 fitness=1.0 → runs/trace.json valid"
+    }
+  },
   "checkpoints": [
     {"step": "P0", "tag": "v0.1.0a1", "at": "2026-05-24T17:55:00+00:00", "outcome": "shipped"},
-    {"step": "P0-hardening", "tag": "v0.1.0a2", "at": "2026-05-24T18:05:00+00:00", "outcome": "post-monitor minor fixes"}
+    {"step": "P0-hardening", "tag": "v0.1.0a2", "at": "2026-05-24T18:05:00+00:00", "outcome": "post-monitor minor fixes"},
+    {"step": "P0-meta-audit-hardening", "tag": "v0.1.0a3", "at": "2026-05-24T12:34:00+00:00", "outcome": "4-agent meta-audit hotfix; 2 FATAL + 10 HIGH + 11 MED fixed; 56 tests pass; W-axis added"}
   ],
   "$schema_version": "2"
 }

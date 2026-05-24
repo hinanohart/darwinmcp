@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.11", "3.12"]
+        python: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
 
@@ -39,7 +39,7 @@ jobs:
         run: uv run ruff check src tests
 
       - name: Unit + honest-marketing tests
-        run: uv run pytest -q tests/unit tests/honest_marketing
+        run: uv run pytest -q tests/unit tests/honest_marketing tests/integration
 
       - name: E2E smoke
         run: uv run pytest -q tests/e2e
@@ -75,3 +75,19 @@ jobs:
 
       - name: INV-2 README honest-marketing — repeat the pytest as a top-level CI gate
         run: uv run pytest -q tests/honest_marketing/test_readme_no_unmeasured_numbers.py
+
+      - name: INV-12 README install command ↔ __version__ sync
+        run: |
+          uv run python - <<'PY'
+          import re, sys, pathlib
+          sys.path.insert(0, "src")
+          from darwinmcp import __version__ as v
+          readme = pathlib.Path("README.md").read_text()
+          # Match `darwinmcp==<v>` and `@v<v>` forms — both should resolve to __version__.
+          shapes = re.findall(r"(?:darwinmcp\s*==|@v)([0-9a-zA-Z.+_-]+)", readme)
+          mismatch = [s for s in shapes if s not in (v, f"v{v}")]
+          if mismatch:
+              print(f"::error::INV-12: README references {mismatch} but __version__ is {v!r}", file=sys.stderr)
+              sys.exit(1)
+          print(f"INV-12 OK: README install refs all match __version__={v!r}")
+          PY

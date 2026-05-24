@@ -13,7 +13,6 @@
 from __future__ import annotations
 
 import hashlib
-import os
 from abc import ABC, abstractmethod
 
 
@@ -69,13 +68,16 @@ class HFInferenceLLM(LLMBackend):
         # INV-1: this is the ONE allowed non-seed NotImplementedError; the
         # `tests/honest_marketing/test_inv1_no_extra_placeholders.py` exempts
         # this file explicitly, and the CI grep guard mirrors that allowlist.
+        # HF_TOKEN is intentionally NOT read here — the v0.2 implementation
+        # will read it (documented in the class docstring above), but reading
+        # it now would falsely imply the v0.1 stub is "almost working".
         del model  # held for v0.2 API compatibility
-        _ = os.environ.get("HF_TOKEN")  # documented input, not used in v0.1
         raise NotImplementedError(
             "HFInferenceLLM is deferred to v0.2. v0.1 ships --backend dummy only."
         )
 
     def propose_diff(self, seed_code: str, hint: str) -> str:  # pragma: no cover
+        del seed_code, hint  # signature held for v0.2 API compatibility
         raise NotImplementedError("v0.2")
 
 

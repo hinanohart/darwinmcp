@@ -77,12 +77,25 @@ class ProgressV2:
 
 
 def write_progress(path: Path, prog: ProgressV2) -> None:
-    path.write_text(json.dumps(prog.to_dict(), indent=2, sort_keys=False))
+    # Atomic write — replace() is POSIX-atomic on the same filesystem; this
+    # eliminates the race window where a reader (a watching agent, jq) sees
+    # a half-written JSON if the writer crashes mid-flush.
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(prog.to_dict(), indent=2, sort_keys=False))
+    tmp.replace(path)
 
 
 def read_progress(path: Path) -> ProgressV2:
     raw = json.loads(path.read_text())
-    raw.pop("$schema_version", None)
+    sv = raw.pop("$schema_version", None)
+    if sv is not None and sv != SCHEMA_VERSION:
+        # Loud failure beats silent mis-deserialise: a v0.2-written progress
+        # file read by a v0.1 wheel would otherwise hit `TypeError: unexpected
+        # keyword argument` with no actionable message.
+        raise ValueError(
+            f"unsupported .darwinmcp-progress.json schema {sv!r}; this wheel "
+            f"reads {SCHEMA_VERSION!r}. Run `darwinmcp init --force` or upgrade."
+        )
     cb_raw = raw.pop("circuit_breaker", None)
     p = ProgressV2(**raw)
     if isinstance(cb_raw, dict):
