@@ -75,7 +75,7 @@ The published `darwinmcp` wheel contains **only** `src/darwinmcp/**/*.py` + `LIC
 - HuggingFace model weights (runtime fetch via `huggingface-hub`)
 - `seed/fs_tool/server.py` patches from third parties
 
-All bundled files are 100% authored in this repo under Apache-2.0.
+All bundled files are 100% authored in this repo under the MIT License.
 
 ---
 
