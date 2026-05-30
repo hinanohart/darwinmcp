@@ -2,7 +2,7 @@
 
 > **Pre-alpha.** Evolve an MCP server's `server.py` code across generations using sandbox-executed fitness and lineage × tool-trace interpretability. **No benchmark numbers are advertised in this README** — see [Honest Marketing](#honest-marketing).
 
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Status: Pre-alpha](https://img.shields.io/badge/status-pre--alpha-orange)](#current-status)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
 
@@ -15,7 +15,7 @@ This is **not** a benchmark harness, a model trainer, or an agent runtime. It is
 - [`mcp`](https://pypi.org/project/mcp/) — MIT, the official Model Context Protocol Python SDK
 - [`networkx`](https://pypi.org/project/networkx/) — BSD-3, lineage DAG
 - Built-in `subprocess` — sandbox (docker-based runtimes deferred to v0.2)
-- [`shinka-evolve`](https://github.com/SakanaAI/ShinkaEvolve) (Apache-2.0) — LLM-guided code mutation. **Not used in v0.1** (PyPI release-cap conflicts with `mcp>=1.25`; see [`R18_LICENSE_CHECK.md`](R18_LICENSE_CHECK.md) § 1). v0.2 integrates via a `git+https` extra (`darwinmcp[shinka-git]`). The v0.1 mutator is `DummyLLM`.
+- [`shinka-evolve`](https://github.com/SakanaAI/ShinkaEvolve) (MIT) — LLM-guided code mutation. **Not used in v0.1** (PyPI release-cap conflicts with `mcp>=1.25`; see [`R18_LICENSE_CHECK.md`](R18_LICENSE_CHECK.md) § 1). v0.2 integrates via a `git+https` extra (`darwinmcp[shinka-git]`). The v0.1 mutator is `DummyLLM`.
 
 ## Differentiation vs prior art (R18 audit)
 
@@ -74,7 +74,7 @@ This project follows `feedback_ship-and-yank-lesson-2026-05-23`:
 
 ## License
 
-[Apache-2.0](LICENSE) © 2026 hinanohart. See [`NOTICE`](NOTICE) for third-party attributions, [`R18_LICENSE_CHECK.md`](R18_LICENSE_CHECK.md) for the full license & prior-art audit.
+[MIT](LICENSE) © 2026 hinanohart. See [`NOTICE`](NOTICE) for third-party attributions, [`R18_LICENSE_CHECK.md`](R18_LICENSE_CHECK.md) for the full license & prior-art audit.
 
 ## Contributing
 

@@ -3,7 +3,7 @@ name = "darwinmcp"
 version = "0.1.0a3"
 description = "Evolve MCP server.py code via subprocess sandbox fitness with lineage × tool-trace interpretability (pre-alpha; SWE-bench Verified adapter is v0.2 backlog)."
 readme = "README.md"
-license = { text = "Apache-2.0" }
+license = { text = "MIT" }
 authors = [
     { name = "hinanohart", email = "runzaisongpu95@gmail.com" }
 ]
@@ -15,7 +15,7 @@ classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
